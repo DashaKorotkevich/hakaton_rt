@@ -1,6 +1,7 @@
 from terrain import TerrainMap
 from simulator import DroneSimulator
 import time
+from navigator import Navigator
 
 def main():
     # 1. Инициализация
@@ -17,18 +18,29 @@ def main():
     # Инициализируем дрон в стартовой точке
     drone = DroneSimulator(start_lat=45.15, start_lon=39.15, speed_mps=20.0)
 
+    nav = Navigator()  # Инициализируем навигатор
+
     print("--- Полет начат ---")
+
     dt = 1.0  # 1 секунда шага симуляции
 
     for i in range(20):
         # 1. Командуем дрону двигаться (например, на Север - 0 градусов)
         drone.update_position(delta_time=dt, bearing_deg=0)
 
+        # Логика вывода каждые 5 секунд:
+        # Проверяем, делится ли текущее время полета на 5 без остатка
+        if i % 5 == 0 and i != 0:
+            print("\nПолная история пакетов:")
+            for packet in nav.all_packets:
+                print(packet)
+
         # 2. Опрашиваем сенсоры дрона
         alt = drone.get_radio_altimeter(my_map)
-
         print(f"Время: {i}с | Позиция: {drone.lat:.4f}, {drone.lon:.4f} | Высота (радио): {alt:.2f} м")
-        time.sleep(0.1)
+
+        nav.add_measurement(alt)
+
 
     # 4. Освобождение ресурсов
     my_map.close()

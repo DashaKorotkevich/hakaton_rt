@@ -4,11 +4,17 @@ import math
 class TerrainMap:
     def __init__(self, path_to_map):
         self.src = rasterio.open(path_to_map)
-        # Получаем размеры для проверок границ
+        # Получаем размеры для проверок границ в пикселях
         self.width = self.src.width
         self.height = self.src.height
         # Матрица трансформации для перевода пикселей в координаты
         self.transform = self.src.transform
+        # Разрешение в метрах
+        self.pixel_size_meters = 10.0
+        # Расчет размера карты
+        self.width_meters = self.width * self.pixel_size_meters
+        self.height_meters = self.height * self.pixel_size_meters
+
 
     def get_height(self, x, y):
         # Превращаем координаты в целые числа для индексации
@@ -61,6 +67,19 @@ class TerrainMap:
             current_lon += lon_step
 
         return profile
+
+    def check_resolution(self):
+        # transform.a — это размер пикселя по горизонтали
+        # transform.e — это размер пикселя по вертикали (обычно отрицательный)
+        res_x = self.transform.a
+        res_y = abs(self.transform.e)
+        print(f"Разрешение пикселя по X (в градусах): {res_x}")
+        print(f"Разрешение пикселя по Y (в градусах): {res_y}")
+
+        # Перевод в метры (примерный для 45-й широты)
+        meters_x = res_x * 111320 * math.cos(math.radians(45))
+        meters_y = res_y * 111132
+        print(f"Примерный размер пикселя в метрах: {meters_x:.2f}x{meters_y:.2f} м")
 
     def close(self):
         self.src.close()

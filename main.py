@@ -1,5 +1,5 @@
 from terrain import TerrainMap
-
+import math
 
 # from navigator import Navigator # Представим, что он у вас есть
 
@@ -7,7 +7,11 @@ def main():
     # 1. Инициализация (загружаем карту)
     # Указываем путь к файлу в вашей папке data
     my_map = TerrainMap("data/Copernicus_DSM_10_N45_00_E039_00_DEM.tif")
-    print(f"Карта загружена. Размер: {my_map.width}x{my_map.height}")
+    print(f"Карта загружена. Размер в пикселях: {my_map.width}x{my_map.height}")
+    my_map.check_resolution()
+    print(f"Размер в метрах: {my_map.width_meters:.0f}x{my_map.height_meters:.0f} м")
+    print(f"Размер в километрах: {my_map.width_meters / 1000:.1f}x{my_map.height_meters / 1000:.1f} км")
+
     # ВЫЗОВ ФУНКЦИИ ИССЛЕДОВАНИЯ
     my_map.inspect_file()
     # 2. Имитация полета (например, дрон летит по прямой)

@@ -1,41 +1,32 @@
 from terrain import TerrainMap
-import math
 
-# from navigator import Navigator # Представим, что он у вас есть
 
 def main():
-    # 1. Инициализация (загружаем карту)
-    # Указываем путь к файлу в вашей папке data
-    my_map = TerrainMap("data/Copernicus_DSM_10_N45_00_E039_00_DEM.tif")
-    print(f"Карта загружена. Размер в пикселях: {my_map.width}x{my_map.height}")
-    my_map.check_resolution()
-    print(f"Размер в метрах: {my_map.width_meters:.0f}x{my_map.height_meters:.0f} м")
-    print(f"Размер в километрах: {my_map.width_meters / 1000:.1f}x{my_map.height_meters / 1000:.1f} км")
+    # 1. Инициализация
+    try:
+        my_map = TerrainMap("data/Copernicus_DSM_10_N45_00_E039_00_DEM.tif")
+    except Exception as e:
+        print(f"Ошибка загрузки карты: {e}")
+        return
 
-    # ВЫЗОВ ФУНКЦИИ ИССЛЕДОВАНИЯ
+    # Вывод информации о карте (используем обновленный метод)
+    print("--- Информация о карте ---")
     my_map.inspect_file()
-    # 2. Имитация полета (например, дрон летит по прямой)
-    # Допустим, мы летим по диагонали карты
-    for i in range(100):
-        x, y = i * 10, i * 10  # Координаты дрона
 
-        # 3. Запрашиваем высоту из нашего класса
-        h_map = my_map.get_height(x, y)
-
-        # Получаем координаты
+    # 2. Имитация полета по прямой (проверка высот в точках)
+    print("\n--- Имитация полета ---")
+    start_x, start_y = 0, 0
+    for i in range(5):
+        x, y = start_x + i * 20, start_y + i * 20
+        h = my_map.get_height(x, y)
         lat, lon = my_map.get_latlon(x, y)
+        print(f"Точка {i}: ({lat:.4f}, {lon:.4f}), высота рельефа: {h if h else 0.0:.1f} м")
 
-        # Азимут (направление движения) — это угол между двумя точками
-        # Для простоты: если мы идем в (x+10, y+10), это движение на Северо-Восток (~45 градусов)
-        azimuth = 45.0
 
-        print(f"Дрон в точке ({lat:.4f}, {lon:.4f}), азимут: {azimuth}°, высота рельефа: {h_map:.1f} м")
-        # Здесь будет логика навигации
-        print(f"Дрон в точке ({x}, {y}), высота рельефа: {h_map} м")
 
     # 4. Освобождение ресурсов
     my_map.close()
-    print("Полет завершен.")
+    print("\nПолет завершен.")
 
 
 if __name__ == "__main__":

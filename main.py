@@ -1,5 +1,6 @@
 from terrain import TerrainMap
-
+from simulator import DroneSimulator
+import time
 
 def main():
     # 1. Инициализация
@@ -13,16 +14,21 @@ def main():
     print("--- Информация о карте ---")
     my_map.inspect_file()
 
-    # 2. Имитация полета по прямой (проверка высот в точках)
-    print("\n--- Имитация полета ---")
-    start_x, start_y = 0, 0
-    for i in range(5):
-        x, y = start_x + i * 20, start_y + i * 20
-        h = my_map.get_height(x, y)
-        lat, lon = my_map.get_latlon(x, y)
-        print(f"Точка {i}: ({lat:.4f}, {lon:.4f}), высота рельефа: {h if h else 0.0:.1f} м")
+    # Инициализируем дрон в стартовой точке
+    drone = DroneSimulator(start_lat=45.15, start_lon=39.15, speed_mps=20.0)
 
+    print("--- Полет начат ---")
+    dt = 1.0  # 1 секунда шага симуляции
 
+    for i in range(20):
+        # 1. Командуем дрону двигаться (например, на Север - 0 градусов)
+        drone.update_position(delta_time=dt, bearing_deg=0)
+
+        # 2. Опрашиваем сенсоры дрона
+        alt = drone.get_radio_altimeter(my_map)
+
+        print(f"Время: {i}с | Позиция: {drone.lat:.4f}, {drone.lon:.4f} | Высота (радио): {alt:.2f} м")
+        time.sleep(0.1)
 
     # 4. Освобождение ресурсов
     my_map.close()

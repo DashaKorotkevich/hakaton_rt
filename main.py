@@ -20,7 +20,7 @@ def main():
 
     # Инициализация дрона и навигатора
     drone = DroneSimulator(start_lat=45.15, start_lon=39.15, speed_mps=20.0)
-    nav = Navigator(start_lat=45.15, start_lon=39.15)
+    nav = Navigator(start_lat=45.15, start_lon=39.15, speed_mps=20.0)
 
     print("--- Полет начат ---")
 
@@ -38,6 +38,10 @@ def main():
         # Передаем только значение высоты
         print(f"Срабатывание: {i} | Позиция: {drone.lat:.4f}, {drone.lon:.4f} | Высота (радио): {alt:.2f} м")
         nav.add_measurement(alt)
+
+        if i % 20 == 0 and i != 0:
+            # Рассчет размера квадрата, где может находится дрон, мы его каждую сек вызывать будем
+            size = nav.get_optimal_patch_size_px(my_map.px_w_m)
 
     my_map.close()
 

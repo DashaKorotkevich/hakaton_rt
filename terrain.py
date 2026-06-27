@@ -26,6 +26,7 @@ class TerrainMap:
         self.px_w_m = deg_res_x * m_per_deg_lon
         self.px_h_m = deg_res_y * m_per_deg_lat
 
+
         # Общие размеры карты в метрах
         self.width_meters = self.width * self.px_w_m
         self.height_meters = self.height * self.px_h_m
@@ -46,6 +47,33 @@ class TerrainMap:
         lon, lat = self.transform * (x, y)
         return lat, lon
 
+    def get_patch_by_latlon(self, center_lat, center_lon, patch_size_px):
+        """
+        Возвращает квадратную матрицу высот вокруг заданной точки.
+        patch_size_px: сторона квадрата в пикселях.
+        """
+        # 1. Переводим GPS в пиксели (row, col)
+        # ~self.src.transform инвертирует матрицу трансформации
+        col, row = ~self.src.transform * (center_lon, center_lat)
+        col, row = int(col), int(row)
+
+        # 2. Вычисляем верхний левый угол окна
+        half = patch_size_px // 2
+        window_col = col - half
+        window_row = row - half
+
+        # 3. Создаем окно для чтения (обработка границ - необязательно,
+        # но rasterio автоматически обрежет, если выйти за края)
+        window = rasterio.windows.Window(window_col, window_row, patch_size_px, patch_size_px)
+
+        # 4. Читаем данные
+        data = self.src.read(1, window=window)
+
+        # Если нужно заменить NoData на что-то другое (например, NaN), можно сделать здесь:
+        if self.src.nodata is not None:
+            data[data == self.src.nodata] = float('nan')
+
+        return data
 
     def inspect_file(self):
         print(f"Размер в пикселях: {self.width}x{self.height}")

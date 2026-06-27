@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 class Navigator:
     def __init__(self, start_lat, start_lon, speed_mps):
@@ -7,6 +8,11 @@ class Navigator:
         self.lon = start_lon
 
         self.speed_mps = speed_mps  # Скорость дрона (м/с) для рассчета размера квадрата в м
+
+        # История полета
+        # Каждый элемент: {'lat': float, 'lon': float, 'course': float, 'alt': float}
+        self.history = []
+        self.second_buffer = []
 
         self.all_minute_packets = []  # История для минут (1200 точек)
         self.all_second_packets = []  # История для секунд (20 точек)
@@ -60,3 +66,28 @@ class Navigator:
         print(f"Физический размер патча: {size_px * map_px_size_m:.2f} м")
 
         return size_px
+
+    def calculate_mse(self, profile, patch_slice):  # Добавили self
+        profile = np.array(profile)
+        patch_slice = np.array(patch_slice)
+        mse = np.mean((profile - patch_slice) ** 2)
+        return mse
+
+    def find_best_match(self, patch, buffer):  # Добавили self
+        min_error = float('inf')
+        best_pos = (0, 0)
+        buf_len = len(buffer)
+        patch_size = patch.shape[0]
+
+        for row in range(patch_size):
+            for col in range(patch_size - buf_len + 1):
+                patch_slice = patch[row, col: col + buf_len]
+
+                # ВАЖНО: вызываем через self.calculate_mse
+                error = self.calculate_mse(buffer, patch_slice)
+
+                if error < min_error:
+                    min_error = error
+                    best_pos = (row, col)
+
+        return best_pos, min_error

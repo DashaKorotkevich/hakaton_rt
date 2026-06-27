@@ -3,6 +3,7 @@ import rasterio.windows
 import math
 
 
+
 class TerrainMap:
     def __init__(self, path_to_map):
         self.src = rasterio.open(path_to_map)
@@ -74,6 +75,43 @@ class TerrainMap:
             data[data == self.src.nodata] = float('nan')
 
         return data
+
+    def pixel_to_latlon(self, best_row, best_col, window_row, window_col):
+        """
+        Переводит пиксельные координаты best_pos обратно в GPS.
+        best_row, best_col — результат find_best_match внутри патча.
+        window_row, window_col — левый верхний угол того окна, которое мы вырезали.
+        """
+        # 1. Находим абсолютную позицию пикселя на всей карте
+        abs_row = window_row + best_row
+        abs_col = window_col + best_col
+
+        # 2. Используем матрицу трансформации (она переводит пиксели в lon, lat)
+        # self.src.transform — это объект, который хранит привязку карты
+        lon, lat = self.src.transform * (abs_col, abs_row)
+
+        return lat, lon
+
+    def get_latlon_from_pixel(self, col, row):
+        """
+        Преобразует индексы пикселя (col, row) в географические координаты (lat, lon).
+        """
+        # Умножаем матрицу трансформации на координаты пикселя
+        # self.src.transform возвращает (lon, lat)
+        lon, lat = self.src.transform * (col, row)
+        return lat, lon
+
+    def find_position_by_profile(self, center_lat, center_lon, profile, patch_size_px):
+        # 1. Сам берет патч
+        patch, window_col, window_row = self.get_patch_by_latlon(center_lat, center_lon, patch_size_px)
+
+        # 2. Сам ищет локальную позицию
+        best_local_row, best_local_col = Navigator.find_best_match(patch, profile)
+
+        # 3. Сам переводит в GPS
+        global_lat, global_lon = self.get_latlon_from_pixel(window_col + best_local_col, window_row + best_local_row)
+
+        return global_lat, global_lon
 
     def inspect_file(self):
         print(f"Размер в пикселях: {self.width}x{self.height}")

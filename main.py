@@ -42,6 +42,15 @@ def main():
         if i % 20 == 0 and i != 0:
             # Рассчет размера квадрата, где может находится дрон, мы его каждую сек вызывать будем
             size = nav.get_optimal_patch_size_px(my_map.px_w_m)
+            # Получаем матрицу высот (наш "кусочек" карты)
+            patch = my_map.get_patch_by_latlon(nav.lat, nav.lon, size)
+            print(f"Сверка: область {size}x{size} пикселей получена. Размер данных: {patch.shape}")
+            # Вызвали "интеллект" навигатора для поиска совпадения
+            best_pos, error = nav.find_best_match(patch, nav.second_buffer)
+            print(f"Лучшее совпадение в патче: {best_pos}, Ошибка: {error:.2f}")
+            get_latlon_from_pixel(best_pos, my_map)
+            new_lat, new_lon = my_map.pixel_to_latlon(best_pos[0], best_pos[1], window_row, window_col)
+            print(f"Коррекция позиции: было ({nav.lat:.4f}, {nav.lon:.4f}), стало ({new_lat:.4f}, {new_lon:.4f})")
 
     my_map.close()
 

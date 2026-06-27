@@ -32,6 +32,21 @@ class TerrainMap:
         self.width_meters = self.width * self.px_w_m
         self.height_meters = self.height * self.px_h_m
 
+    def get_altitude(self, lat, lon):
+            """
+            Универсальный метод: дает высоту по GPS-координатам.
+            Вся грязная работа спрятана здесь.
+            """
+            # 1. Тот самый перевод, который бесит
+            col, row = ~self.src.transform * (lon, lat)
+
+            # 2. Чтение данных
+            # Используем .sample(), он сам найдет нужное значение в матрице
+            data = self.src.sample([(col, row)])
+            altitude = next(data)[0]
+
+            return altitude
+
     def get_height(self, x, y):
         """Возвращает высоту по пиксельным координатам x (col), y (row)"""
         px, py = int(x), int(y)
@@ -101,17 +116,7 @@ class TerrainMap:
         lon, lat = self.src.transform * (col, row)
         return lat, lon
 
-    def find_position_by_profile(self, center_lat, center_lon, profile, patch_size_px):
-        # 1. Сам берет патч
-        patch, window_col, window_row = self.get_patch_by_latlon(center_lat, center_lon, patch_size_px)
 
-        # 2. Сам ищет локальную позицию
-        best_local_row, best_local_col = Navigator.find_best_match(patch, profile)
-
-        # 3. Сам переводит в GPS
-        global_lat, global_lon = self.get_latlon_from_pixel(window_col + best_local_col, window_row + best_local_row)
-
-        return global_lat, global_lon
 
     def inspect_file(self):
         print(f"Размер в пикселях: {self.width}x{self.height}")

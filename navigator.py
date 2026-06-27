@@ -1,13 +1,25 @@
 class Navigator:
     def __init__(self):
-        self.all_packets = []  # Хранит все пакеты
-        self.current_buffer = []  # Накопитель на текущие 5 секунд
+        self.all_minute_packets = []  # История для минут (1200 точек)
+        self.all_second_packets = []  # История для секунд (20 точек)
+
+        self.second_buffer = []  # Текущий буфер на 1 сек
+        self.minute_buffer = []  # Текущий буфер на 1 мин
 
     def add_measurement(self, height):
-        self.current_buffer.append(height)
+        self.second_buffer.append(height)
+        self.minute_buffer.append(height)
 
-        # Если накопилось 5 измерений, сохраняем пакет и очищаем буфер
-        if len(self.current_buffer) >= 5:
-            self.all_packets.append(list(self.current_buffer))
-            print(f"Пакет зафиксирован: {self.current_buffer}")
-            self.current_buffer = []  # Очистка для следующей пятисекундки
+        # 1. Проверка на секунду (20 записей)
+        if len(self.second_buffer) == 20:
+            packet = list(self.second_buffer)
+            self.all_second_packets.append(packet)
+            print(f"--- Пакет за секунду готов: {len(packet)} записей ---")
+            self.second_buffer = []
+
+        # 2. Проверка на минуту (1200 записей)
+        if len(self.minute_buffer) == 1200:
+            packet = list(self.minute_buffer)
+            self.all_minute_packets.append(packet)
+            print(f"--- ПАКЕТ ЗА МИНУТУ ГОТОВ: {len(packet)} записей ---")
+            self.minute_buffer = []

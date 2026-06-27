@@ -1,7 +1,14 @@
 from terrain import TerrainMap
 from simulator import DroneSimulator
-import time
 from navigator import Navigator
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def calculate_total_steps(duration_sec, dt):
+    """Вычисляет количество итераций для заданного времени и шага."""
+    return int(duration_sec / dt)
+
 
 def main():
     # 1. Инициализация
@@ -11,40 +18,28 @@ def main():
         print(f"Ошибка загрузки карты: {e}")
         return
 
-    # Вывод информации о карте (используем обновленный метод)
-    print("--- Информация о карте ---")
-    my_map.inspect_file()
-
-    # Инициализируем дрон в стартовой точке
+    # Инициализация дрона и навигатора
     drone = DroneSimulator(start_lat=45.15, start_lon=39.15, speed_mps=20.0)
-
-    nav = Navigator()  # Инициализируем навигатор
+    nav = Navigator()
 
     print("--- Полет начат ---")
 
-    dt = 1.0  # 1 секунда шага симуляции
+    dt = 0.05  # 20 Гц
+    flight_time_sec = 120  # время полета в секунд
+    total_steps = calculate_total_steps(flight_time_sec, dt)
 
-    for i in range(20):
-        # 1. Командуем дрону двигаться (например, на Север - 0 градусов)
+    for i in range(total_steps):
+        # 1. Движение
         drone.update_position(delta_time=dt, bearing_deg=0)
 
-        # Логика вывода каждые 5 секунд:
-        # Проверяем, делится ли текущее время полета на 5 без остатка
-        if i % 5 == 0 and i != 0:
-            print("\nПолная история пакетов:")
-            for packet in nav.all_packets:
-                print(packet)
-
-        # 2. Опрашиваем сенсоры дрона
+        # 2. Опрос датчика
         alt = drone.get_radio_altimeter(my_map)
-        print(f"Время: {i}с | Позиция: {drone.lat:.4f}, {drone.lon:.4f} | Высота (радио): {alt:.2f} м")
 
+        # Передаем только значение высоты
+        print(f"Срабатывание: {i} | Позиция: {drone.lat:.4f}, {drone.lon:.4f} | Высота (радио): {alt:.2f} м")
         nav.add_measurement(alt)
 
-
-    # 4. Освобождение ресурсов
     my_map.close()
-    print("\nПолет завершен.")
 
 
 if __name__ == "__main__":

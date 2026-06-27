@@ -20,7 +20,7 @@ def main():
 
     # Инициализация дрона и навигатора
     drone = DroneSimulator(start_lat=45.15, start_lon=39.15, speed_mps=20.0)
-    nav = Navigator()
+    nav = Navigator(start_lat=45.15, start_lon=39.15)
 
     print("--- Полет начат ---")
 

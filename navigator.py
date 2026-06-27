@@ -1,12 +1,16 @@
 class Navigator:
-    def __init__(self):
+    def __init__(self, start_lat, start_lon):
+        # Сохраняем координаты
+        self.lat = start_lat
+        self.lon = start_lon
+
         self.all_minute_packets = []  # История для минут (1200 точек)
         self.all_second_packets = []  # История для секунд (20 точек)
 
         self.second_buffer = []  # Текущий буфер на 1 сек
         self.minute_buffer = []  # Текущий буфер на 1 мин
 
-    def add_measurement(self, height):
+    def add_measurement(self, height): # работа с пакетами (радиовысотометром)
         self.second_buffer.append(height)
         self.minute_buffer.append(height)
 

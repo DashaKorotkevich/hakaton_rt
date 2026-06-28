@@ -32,20 +32,27 @@ class TerrainMap:
         self.width_meters = self.width * self.px_w_m
         self.height_meters = self.height * self.px_h_m
 
+    def latlon_to_rowcol(self, lat, lon):
+        return self.src.index(lon, lat)
+
     def get_altitude(self, lat, lon):
-            """
-            Универсальный метод: дает высоту по GPS-координатам.
-            Вся грязная работа спрятана здесь.
-            """
-            # 1. Тот самый перевод, который бесит
-            col, row = ~self.src.transform * (lon, lat)
+        # 1. Получаем индексы пикселя (строка, столбец)
+        # Важно: rasterio ожидает (lon, lat)
+        row, col = self.src.index(lon, lat)
 
-            # 2. Чтение данных
-            # Используем .sample(), он сам найдет нужное значение в матрице
-            data = self.src.sample([(col, row)])
-            altitude = next(data)[0]
+        # 2. Проверяем границы
+        if 0 <= row < self.src.height and 0 <= col < self.src.width:
+            # 3. Читаем один пиксель
+            # Читаем окно размером 1x1 пиксель
+            window = rasterio.windows.Window(col, row, 1, 1)
+            data = self.src.read(1, window=window)
 
-            return altitude
+            # 4. Возвращаем как число float, а не как массив
+            val = data[0, 0]
+            return float(val)
+        else:
+            print(f"0 <= {row=} < {self.src.height=} and 0 <= {col=} < {self.src.width=}")
+            return 0.0  # Если точка за пределами карты
 
     def get_height(self, x, y):
         """Возвращает высоту по пиксельным координатам x (col), y (row)"""

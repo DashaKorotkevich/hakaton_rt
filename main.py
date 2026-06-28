@@ -45,10 +45,28 @@ def main():
         {'lat': 45.869285, 'lon': 39.127818, 'alt': 100.5},
         {'lat': 45.869176, 'lon': 39.127788, 'alt': 100.1}
     ]
+    elevation_arr_alimeter2 = [
+        {'lat': 45.49900, 'lon': 39.50100, 'alt': 105.2},
+        {'lat': 45.49837, 'lon': 39.50190, 'alt': 104.8},
+        {'lat': 45.49774, 'lon': 39.50280, 'alt': 105.5},
+        {'lat': 45.49711, 'lon': 39.50370, 'alt': 106.1},
+        {'lat': 45.49648, 'lon': 39.50460, 'alt': 105.9},
+        {'lat': 45.49585, 'lon': 39.50550, 'alt': 106.4},
+        {'lat': 45.49522, 'lon': 39.50640, 'alt': 107.0},
+        {'lat': 45.49459, 'lon': 39.50730, 'alt': 106.8},
+        {'lat': 45.49396, 'lon': 39.50820, 'alt': 107.2},
+        {'lat': 45.49333, 'lon': 39.50910, 'alt': 107.5},
+        {'lat': 45.49270, 'lon': 39.51000, 'alt': 108.1},
+        {'lat': 45.49207, 'lon': 39.51090, 'alt': 107.9},
+        {'lat': 45.49144, 'lon': 39.51180, 'alt': 108.3},
+        {'lat': 45.49081, 'lon': 39.51270, 'alt': 108.7},
+        {'lat': 45.49018, 'lon': 39.51360, 'alt': 109.0}
+    ]
     dt = 0.05  # 20 Гц
     speed = 20.0
     # 1. Создаем массив для хранения высот с карты
     map_altitudes = []
+    map_altitudes2 = []
 
     # 1. Инициализация
     try:
@@ -76,16 +94,29 @@ def main():
     # Визуализация карты высот
     plot_elevation_map(elevation_data)
 
+    print(f"Границы карты (Left, Bottom, Right, Top): {my_map.src.bounds}")
     # 2. Проходим по каждой точке маршрута
     for point in elevation_arr_alimeter:
         # Используем наш метод, который мы спрятали в классе
         alt = my_map.get_altitude(point['lat'], point['lon'])
         map_altitudes.append(alt)
 
-        print(f"Точка ({point['lat']:.5f}, {point['lon']:.5f}): датчик={point['alt']:.2f}м, карта={alt:.2f}м")
+        print(f"Точка ({point['lat']:.5f}, {point['lon']:.5f}): хуйня сгенерированная ={point['alt']:.2f}м, высота с карты={alt:.2f}м")
 
     # Теперь map_altitudes - это список с высотами из .tif файла
     print("Список высот с карты:", map_altitudes)
+
+    for point in elevation_arr_alimeter2:
+        # Используем наш метод, который мы спрятали в классе
+        alt = my_map.get_altitude(point['lat'], point['lon'])
+        map_altitudes2.append(alt)
+
+        print(f"Точка ({point['lat']:.5f}, {point['lon']:.5f}): хуйня сгенерированная ={point['alt']:.2f}м, высота с карты={alt:.2f}м")
+
+    # Теперь map_altitudes - это список с высотами из .tif файла
+    print("Список высот с карты:", map_altitudes2)
+
+
 
     my_map.close()
 

@@ -33,12 +33,12 @@ class TerrainMap:
         self.height_meters = self.height * self.px_h_m
 
     def latlon_to_rowcol(self, lat, lon):
-        return self.src.index(lon, lat)
+        return self.src.index(lat, lon)
 
     def get_altitude(self, lat, lon):
         # 1. Получаем индексы пикселя (строка, столбец)
         # Важно: rasterio ожидает (lon, lat)
-        row, col = self.src.index(lon, lat)
+        row, col = self.latlon_to_rowcol(lon, lat)
 
         # 2. Проверяем границы
         if 0 <= row < self.src.height and 0 <= col < self.src.width:
